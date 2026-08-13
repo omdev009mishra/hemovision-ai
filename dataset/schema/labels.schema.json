@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hemovision.ai/schemas/labels.schema.json",
   "title": "GroundTruthLabelRecord",
-  "description": "Schema for clinical reference laboratory measurements and contextual anemia risk labels.",
+  "description": "Legacy Phase 0 alias for laboratory reference measurements and contextual anemia labels.",
   "type": "object",
   "properties": {
     "image_id": {
@@ -28,21 +28,17 @@
     },
     "measurement_method": {
       "type": "string",
-      "description": "Laboratory instrument or reference standard method (e.g., Sysmex XN-1000, HemoCue 201+, Cyanmethemoglobin reference)."
+      "description": "Laboratory instrument or reference standard method."
     },
     "anemia_label": {
       "type": "string",
       "enum": ["no_evidence_of_anemia", "possible_anemia", "severe_anemia", "unable_to_determine", "unlabeled"],
-      "description": "Contextual anemia categorization. Note: Thresholds are population/study-specific and not hardcoded universally."
+      "description": "Contextual anemia categorization."
     },
     "label_source": {
       "type": "string",
       "enum": ["venous_lab_cbc", "capillary_hemocue", "clinical_expert_consensus", "research_protocol_derived"],
       "description": "Origin of the ground truth label."
-    },
-    "applied_cutoff_g_dl": {
-      "type": "number",
-      "description": "Specific Hb threshold (g/dL) applied by the study protocol for the categorical label, accounting for age/sex/pregnancy/altitude context."
     }
   },
   "required": [

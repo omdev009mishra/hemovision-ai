@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hemovision.ai/schemas/images.schema.json",
   "title": "ImageRecord",
-  "description": "Schema for eye photograph metadata, optical hardware properties, and image quality metrics.",
+  "description": "Schema for individual conjunctival photograph metadata, camera hardware specs, and quality metrics.",
   "type": "object",
   "properties": {
     "image_id": {
@@ -10,33 +10,47 @@
       "pattern": "^[A-Za-z0-9_-]{3,64}$",
       "description": "Unique image record identifier."
     },
+    "session_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{3,64}$",
+      "description": "Capture session identifier."
+    },
     "participant_id": {
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]{3,64}$",
       "description": "Pseudonymous participant identifier."
-    },
-    "image_path": {
-      "type": "string",
-      "description": "Relative local file path to saved photograph (e.g. data/private/images/HV-IMG-001042.png)."
     },
     "eye_side": {
       "type": "string",
       "enum": ["left", "right", "unknown"],
       "description": "Which eye is captured in the photograph."
     },
-    "phone_model": {
+    "frame_index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Frame index within multi-frame capture burst."
+    },
+    "image_path": {
       "type": "string",
-      "description": "Smartphone manufacturer and model string (e.g., Google Pixel 7 Pro, iPhone 14)."
+      "description": "Relative storage path to image file."
     },
     "capture_timestamp": {
       "type": "string",
       "format": "date-time",
       "description": "ISO 8601 timestamp of photo capture."
     },
-    "lighting_condition": {
+    "phone_manufacturer": {
       "type": "string",
-      "enum": ["indoor_ambient", "indoor_led_flash", "outdoor_shade", "direct_sunlight", "controlled_light_box", "unknown"],
-      "description": "Illumination environment during capture."
+      "description": "Smartphone manufacturer (e.g. Google, Apple, Samsung)."
+    },
+    "phone_model": {
+      "type": "string",
+      "description": "Smartphone model (e.g. Pixel 7 Pro, iPhone 14)."
+    },
+    "camera_lens_type": {
+      "type": "string",
+      "enum": ["main_wide", "telephoto", "ultra_wide", "front_facing", "unknown"],
+      "description": "Camera lens module utilized."
     },
     "image_width": {
       "type": "integer",
@@ -51,7 +65,7 @@
     "focus_score": {
       "type": "number",
       "minimum": 0.0,
-      "description": "Quantitative image sharpness / focus measure (e.g., Laplacian variance)."
+      "description": "Quantitative image focus metric (e.g. Laplacian variance)."
     },
     "exposure_info": {
       "type": "object",
@@ -79,6 +93,11 @@
       "required": ["mean_intensity", "exposure_status"],
       "additionalProperties": false
     },
+    "image_quality_status": {
+      "type": "string",
+      "enum": ["usable", "rejected_blur", "rejected_exposure", "rejected_occlusion", "rejected_framing", "pending_review"],
+      "description": "Quality assessment decision status."
+    },
     "annotation_status": {
       "type": "string",
       "enum": ["unannotated", "in_review", "annotated", "rejected_quality"],
@@ -87,16 +106,20 @@
   },
   "required": [
     "image_id",
+    "session_id",
     "participant_id",
-    "image_path",
     "eye_side",
-    "phone_model",
+    "frame_index",
+    "image_path",
     "capture_timestamp",
-    "lighting_condition",
+    "phone_manufacturer",
+    "phone_model",
+    "camera_lens_type",
     "image_width",
     "image_height",
     "focus_score",
     "exposure_info",
+    "image_quality_status",
     "annotation_status"
   ],
   "additionalProperties": false
