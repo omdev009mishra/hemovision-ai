@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hemovision.ai/schemas/labels.schema.json",
+  "title": "GroundTruthLabelRecord",
+  "description": "Schema for clinical reference laboratory measurements and contextual anemia risk labels.",
+  "type": "object",
+  "properties": {
+    "image_id": {
+      "type": "string",
+      "pattern": "^HV-IMG-[A-Za-z0-9-]{4,36}$",
+      "description": "Unique image record identifier."
+    },
+    "participant_id": {
+      "type": "string",
+      "pattern": "^HV-P-[A-Za-z0-9]{4,12}$",
+      "description": "Pseudonymous participant identifier."
+    },
+    "laboratory_hb_g_dl": {
+      "type": "number",
+      "minimum": 2.0,
+      "maximum": 25.0,
+      "description": "Reference laboratory hemoglobin concentration in g/dL."
+    },
+    "measurement_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of reference laboratory blood draw."
+    },
+    "measurement_method": {
+      "type": "string",
+      "description": "Laboratory instrument or reference standard method (e.g., Sysmex XN-1000, HemoCue 201+, Cyanmethemoglobin reference)."
+    },
+    "anemia_label": {
+      "type": "string",
+      "enum": ["no_evidence_of_anemia", "possible_anemia", "severe_anemia", "unable_to_determine", "unlabeled"],
+      "description": "Contextual anemia categorization. Note: Thresholds are population/study-specific and not hardcoded universally."
+    },
+    "label_source": {
+      "type": "string",
+      "enum": ["venous_lab_cbc", "capillary_hemocue", "clinical_expert_consensus", "research_protocol_derived"],
+      "description": "Origin of the ground truth label."
+    },
+    "applied_cutoff_g_dl": {
+      "type": "number",
+      "description": "Specific Hb threshold (g/dL) applied by the study protocol for the categorical label, accounting for age/sex/pregnancy/altitude context."
+    }
+  },
+  "required": [
+    "image_id",
+    "participant_id",
+    "laboratory_hb_g_dl",
+    "measurement_timestamp",
+    "measurement_method",
+    "anemia_label",
+    "label_source"
+  ],
+  "additionalProperties": false
+}

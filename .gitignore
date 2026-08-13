@@ -1,0 +1,79 @@
+# Environment & Secrets
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+*.crt
+credentials.json
+secrets.yaml
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+ENV/
+env/
+
+# Machine Learning Artifacts & Models
+*.pth
+*.pt
+*.onnx
+*.safetensors
+*.bin
+*.h5
+*.tflite
+*.ckpt
+*.joblib
+*.pkl
+
+# Datasets & Clinical Data (STRICT PRIVACY)
+data/raw/
+data/private/
+dataset/raw/
+dataset/private/
+dataset/metadata/*
+!dataset/metadata/.gitkeep
+dataset/samples/*
+!dataset/samples/.gitkeep
+*.dicom
+*.dcm
+*.svs
+
+# Jupyter Notebooks & Caches
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# Flutter / Mobile
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+android/.gradle
+ios/Pods/
+
+# Node / Backend
+node_modules/
+dist/
+out/
+
+# IDE & OS Artifacts
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

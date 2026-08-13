@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hemovision.ai/schemas/images.schema.json",
+  "title": "ImageRecord",
+  "description": "Schema for eye photograph metadata, optical hardware properties, and image quality metrics.",
+  "type": "object",
+  "properties": {
+    "image_id": {
+      "type": "string",
+      "pattern": "^HV-IMG-[A-Za-z0-9-]{4,36}$",
+      "description": "Unique image record identifier."
+    },
+    "participant_id": {
+      "type": "string",
+      "pattern": "^HV-P-[A-Za-z0-9]{4,12}$",
+      "description": "Pseudonymous participant identifier."
+    },
+    "image_path": {
+      "type": "string",
+      "description": "Relative local file path to saved photograph (e.g. data/private/images/HV-IMG-001042.png)."
+    },
+    "eye_side": {
+      "type": "string",
+      "enum": ["left", "right", "unknown"],
+      "description": "Which eye is captured in the photograph."
+    },
+    "phone_model": {
+      "type": "string",
+      "description": "Smartphone manufacturer and model string (e.g., Google Pixel 7 Pro, iPhone 14)."
+    },
+    "capture_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of photo capture."
+    },
+    "lighting_condition": {
+      "type": "string",
+      "enum": ["indoor_ambient", "indoor_led_flash", "outdoor_shade", "direct_sunlight", "controlled_light_box", "unknown"],
+      "description": "Illumination environment during capture."
+    },
+    "image_width": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Image width in pixels."
+    },
+    "image_height": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Image height in pixels."
+    },
+    "focus_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Quantitative image sharpness / focus measure (e.g., Laplacian variance)."
+    },
+    "exposure_info": {
+      "type": "object",
+      "properties": {
+        "mean_intensity": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 255.0
+        },
+        "overexposed_pixel_ratio": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "underexposed_pixel_ratio": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "exposure_status": {
+          "type": "string",
+          "enum": ["optimal", "overexposed", "underexposed"]
+        }
+      },
+      "required": ["mean_intensity", "exposure_status"],
+      "additionalProperties": false
+    },
+    "annotation_status": {
+      "type": "string",
+      "enum": ["unannotated", "in_review", "annotated", "rejected_quality"],
+      "description": "Status of segmentation boundary annotation."
+    }
+  },
+  "required": [
+    "image_id",
+    "participant_id",
+    "image_path",
+    "eye_side",
+    "phone_model",
+    "capture_timestamp",
+    "lighting_condition",
+    "image_width",
+    "image_height",
+    "focus_score",
+    "exposure_info",
+    "annotation_status"
+  ],
+  "additionalProperties": false
+}
