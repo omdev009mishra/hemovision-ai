@@ -43,6 +43,7 @@ dataset/metadata/*
 !dataset/metadata/.gitkeep
 dataset/samples/*
 !dataset/samples/.gitkeep
+!dataset/samples/synthetic_eye_001.png
 *.dicom
 *.dcm
 *.svs
@@ -77,3 +78,8 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Research Test Temporaries
+research/test_models/
+research/test_reports/
+research/test_manifest.json

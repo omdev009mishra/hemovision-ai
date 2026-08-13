@@ -1,0 +1,26 @@
+{
+  "model_version": "smoke-test-v0.1.0",
+  "model_type": "Ridge",
+  "dataset_version": "1.0.0",
+  "feature_version": "1.0.0",
+  "preprocessing_version": "1.0.0",
+  "training_timestamp": "2026-08-13T17:54:21.780252+00:00",
+  "random_seed": 42,
+  "training_participants": 7,
+  "validation_participants": 2,
+  "test_participants": 1,
+  "validation_metrics": {
+    "mae": 0.0,
+    "rmse": 0.0,
+    "r2": 0.0
+  },
+  "test_metrics": {
+    "mae": 0.0,
+    "rmse": 0.0,
+    "r2": 0.0
+  },
+  "is_clinical_model": false,
+  "limitations": [
+    "SYNTHETIC TEST ARTIFACT \u2014 NOT FOR CLINICAL USE"
+  ]
+}
