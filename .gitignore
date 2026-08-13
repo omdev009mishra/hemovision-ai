@@ -77,3 +77,8 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Research Test Temporaries
+research/test_models/
+research/test_reports/
+research/test_manifest.json

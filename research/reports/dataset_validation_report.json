@@ -1,0 +1,20 @@
+{
+  "summary": {
+    "total_records": 1,
+    "total_participants": 1,
+    "total_sessions": 1,
+    "total_images": 1,
+    "error_count": 0,
+    "warning_count": 1,
+    "is_valid": true
+  },
+  "issues": [
+    {
+      "check_id": 6,
+      "check_name": "Image Existence",
+      "severity": "WARNING",
+      "entity_id": "SYNTHETIC-IMG001",
+      "message": "Image file does not exist on disk: dataset/samples/synthetic_eye_001.png"
+    }
+  ]
+}
