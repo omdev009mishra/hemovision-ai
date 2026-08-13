@@ -1,0 +1,32 @@
+# Research-study configuration template. This file does not constitute approval.
+study_id: STUDY_ID_REQUIRED
+protocol_version: PROTOCOL_VERSION_REQUIRED
+schema_version: "9.0"
+study_status: APPROVAL_PENDING
+
+participant:
+  inclusion_criteria:
+    - "PROPOSED — REQUIRES STUDY APPROVAL"
+  exclusion_criteria:
+    - "PROPOSED — REQUIRES STUDY APPROVAL"
+
+capture:
+  required_eyes: [left, right]
+  frames_per_eye: "PROTOCOL_REQUIRED"
+  camera_direction: "preferred_rear_camera; record actual configuration"
+  lighting_protocol: "PROTOCOL_REQUIRED"
+  alignment_protocol: "PROTOCOL_REQUIRED"
+
+laboratory:
+  reference_measurement: "laboratory hemoglobin per approved protocol"
+  alignment_window: "PROTOCOL_REQUIRED"
+  measurement_method: "PROTOCOL_REQUIRED"
+
+data:
+  dataset_version: "UNASSIGNED"
+  retention_policy: "INSTITUTIONAL_POLICY_REQUIRED"
+
+governance:
+  ethics_approval_reference: ETHICS_APPROVAL_REFERENCE_REQUIRED
+  consent_version: CONSENT_VERSION_REQUIRED
+  data_controller: "DATA_CONTROLLER_REQUIRED"

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hemovision.ai/schemas/study_status.schema.json",
+  "title": "ResearchStudyStatus",
+  "description": "Explicit institutional study status. Software must not infer approval.",
+  "type": "object",
+  "required": ["study_status", "approval_status"],
+  "properties": {
+    "study_status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "PROTOCOL_READY",
+        "APPROVAL_PENDING",
+        "APPROVED_FOR_COLLECTION",
+        "PILOT_COLLECTION",
+        "DATA_COLLECTION",
+        "DATA_FREEZE",
+        "CLOSED"
+      ],
+      "default": "APPROVAL_PENDING"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": ["NOT_APPROVED_FOR_HUMAN_COLLECTION", "EXPLICITLY_AUTHORIZED_BY_INSTITUTION"],
+      "default": "NOT_APPROVED_FOR_HUMAN_COLLECTION"
+    },
+    "updated_timestamp": {"type": "string", "format": "date-time"},
+    "updated_by": {
+      "type": "string",
+      "description": "Pseudonymous authorized role or operator identifier."
+    }
+  },
+  "additionalProperties": false
+}

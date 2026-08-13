@@ -7,7 +7,9 @@
     "participant_id",
     "consent_version",
     "consent_timestamp",
-    "consent_status"
+    "consent_status",
+    "withdrawal_status",
+    "operator_id"
   ],
   "properties": {
     "consent_id": {

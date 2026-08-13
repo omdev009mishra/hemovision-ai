@@ -1,0 +1,12 @@
+{
+  "freeze_status": "OPEN",
+  "freeze_timestamp": null,
+  "clinical_validation_status": "NOT_PERFORMED",
+  "clinical_training_status": "BLOCKED",
+  "record_count": 0,
+  "research_ready_image_count": 0,
+  "excluded_image_count": 0,
+  "withdrawn_participant_count": 0,
+  "checks": {},
+  "hard_failures": []
+}
