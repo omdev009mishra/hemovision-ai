@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hemovision.ai/schemas/participants.schema.json",
   "title": "ParticipantRecord",
   "description": "Schema for clinical study participant demographics, baseline physiological state, and confounding factors.",
@@ -7,10 +7,10 @@
   "properties": {
     "participant_id": {
       "type": "string",
-      "pattern": "^HV-P-[A-Za-z0-9]{4,12}$",
+      "pattern": "^[A-Za-z0-9_-]{3,64}$",
       "description": "Pseudonymous participant identifier."
     },
-    "age": {
+    "age_years": {
       "type": "integer",
       "minimum": 0,
       "maximum": 120,
@@ -24,39 +24,42 @@
     "pregnancy_status": {
       "type": "string",
       "enum": ["not_pregnant", "first_trimester", "second_trimester", "third_trimester", "postpartum", "not_applicable", "unknown"],
-      "description": "Pregnancy trimester or status."
+      "description": "Pregnancy status or trimester."
     },
     "smoking_status": {
       "type": "string",
-      "enum": ["non_smoker", "active_smoker", "former_smoker", "unknown"],
+      "enum": ["never", "active_smoker", "former_smoker", "unknown"],
       "description": "Tobacco smoking status."
     },
-    "skin_tone_fitzpatrick": {
+    "skin_phototype": {
       "type": "string",
       "enum": ["I", "II", "III", "IV", "V", "VI", "unknown"],
       "description": "Fitzpatrick skin phototype scale."
     },
-    "ethnicity": {
-      "type": "string",
-      "description": "Self-reported demographic or geographic background."
-    },
     "residence_altitude_m": {
       "type": "number",
-      "minimum": 0,
-      "maximum": 9000,
-      "description": "Approximate altitude of primary residence in meters above sea level."
+      "minimum": 0.0,
+      "maximum": 9000.0,
+      "description": "Approximate altitude of primary residence in meters."
     },
-    "known_comorbidities": {
+    "relevant_comorbidities": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "List of reported co-occurring physiological or ocular conditions."
+      "description": "List of reported co-occurring physiological conditions."
+    },
+    "relevant_ocular_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of reported ocular conditions (e.g., pinguecula, pterygium, conjunctivitis)."
     }
   },
   "required": [
     "participant_id",
-    "age",
+    "age_years",
     "sex",
     "pregnancy_status",
     "smoking_status"
