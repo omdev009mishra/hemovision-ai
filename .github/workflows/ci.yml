@@ -23,6 +23,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest jsonschema
 
-      - name: Run Schema & Syntax Unit Tests
+      - name: Run Schema & Synthetic Fixture Unit Tests
         run: |
-          pytest ml/tests/
+          pytest ml/tests/ -v
