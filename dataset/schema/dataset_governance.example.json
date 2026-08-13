@@ -1,0 +1,12 @@
+{
+  "dataset_type": "clinical",
+  "governance_status": "unverified",
+  "consent_required": true,
+  "consent_verified": false,
+  "ethics_approval_reference": "ETHICS_APPROVAL_REFERENCE_REQUIRED",
+  "data_controller": "INSTITUTIONAL_DATA_CONTROLLER_REQUIRED",
+  "collection_protocol_version": "v1.0.0",
+  "deidentification_verified": false,
+  "clinical_training_allowed": false,
+  "disclaimer": "This is an unverified governance declaration template. Governed status requires verified institutional IRB/IEC approval and data controller sign-off."
+}

@@ -39,6 +39,8 @@ data/raw/
 data/private/
 dataset/raw/
 dataset/private/
+dataset/clinical/*
+!dataset/clinical/.gitkeep
 dataset/metadata/*
 !dataset/metadata/.gitkeep
 dataset/samples/*

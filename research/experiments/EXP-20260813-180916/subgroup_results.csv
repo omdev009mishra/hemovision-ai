@@ -1,0 +1,7 @@
+subgroup_dimension,subgroup_value,sample_size,mae,rmse,r2,pearson_r,spearman_rho,is_synthetic_smoke_test
+camera_lens_direction,back,20,0.4682,0.5795,0.8815,0.9597,0.9459,True
+camera_lens_direction,front,20,0.4338,0.5312,0.8402,0.9291,0.9383,True
+phone_manufacturer,Apple,10,0.4404,0.5185,0.8879,0.9627,0.9636,True
+phone_manufacturer,Google,10,0.4127,0.5523,0.8437,0.9366,0.9636,True
+phone_manufacturer,Motorola,10,0.4959,0.6346,0.8709,0.9683,0.9515,True
+phone_manufacturer,Samsung,10,0.4549,0.5093,0.8222,0.9153,0.8788,True
