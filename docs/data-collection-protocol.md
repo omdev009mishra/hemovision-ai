@@ -1,72 +1,88 @@
-# Data Collection Protocol & Leakage Protection
+# Data Collection Protocol & Standard Operating Procedure
 
-This document outlines the protocol for prospective data collection and the mandatory data leakage rules enforced across the HemoVision project.
-
----
-
-## 1. Data Collection Fields
-
-For each clinical study participant, the following structured dataset fields must be collected:
-
-### Participant Demographics & Clinical Profile
-* `participant_id`: Unique pseudonymous identifier (e.g., `HV-P-1002`).
-* `age`: Age in completed years.
-* `sex`: Biological sex assigned at birth (`male`, `female`, `intersex`).
-* `pregnancy_status`: (`pregnant`, `not_pregnant`, `not_applicable`).
-* `smoking_status`: (`non_smoker`, `active_smoker`, `former_smoker`).
-* `skin_tone_fitzpatrick`: Fitzpatrick scale phototype (`I` through `VI`).
-* `residence_altitude_m`: Altitude of primary residence in meters above sea level.
-
-### Ground Truth Laboratory Reference
-* `laboratory_hb_g_dl`: Quantitative hemoglobin level in g/dL.
-* `cbc_rbc_count`: Red blood cell count ($10^6 / \mu\text{L}$) where available.
-* `cbc_hematocrit_pct`: Hematocrit percentage where available.
-* `lab_measurement_timestamp`: ISO 8601 timestamp of blood sample collection.
-* `lab_measurement_method`: Equipment name / reference method (e.g., `Sysmex XN-1000`).
-
-### Image & Capture Conditions
-* `image_id`: Unique image UUID.
-* `eye_side`: Left eye (`left`) or right eye (`right`).
-* `phone_model`: Device hardware identifier (e.g., `Google Pixel 7`, `iPhone 14`).
-* `camera_lens_type`: Main wide vs telephoto camera lens.
-* `capture_timestamp`: ISO 8601 timestamp of photo capture.
-* `lighting_condition`: (`indoor_ambient`, `indoor_led_flash`, `outdoor_shade`, `direct_sunlight`).
-* `operator_id`: Anonymized clinician/research assistant ID.
-
----
-
-## 2. 🛡️ MANDATORY DATA LEAKAGE PROTECTION
+This document defines the 14-step standard operating procedure (SOP) for data collection and dataset ingestion in HemoVision.
 
 > [!CAUTION]
-> ### PARTICIPANT-LEVEL DATA SPLITTING RULE
-> **Data splitting across TRAIN, VALIDATION, and TEST sets MUST be executed strictly at the PARTICIPANT ID level.**
+> ### 🛡️ STRICT HEALTH DATA PRIVACY MANDATE
+> **RAW CLINICAL DATA, PATIENT PHOTOGRAPHS, AND IDENTIFIABLE HEALTH RECORDS MUST NEVER BE STORED IN GIT OR PUBLIC REPOSITORIES.**
+> All real clinical datasets must be kept in encrypted, HIPAA/GDPR-compliant cloud buckets or secure local servers listed in `.gitignore`.
 
-### ❌ FORBIDDEN (Image-Level Split)
-Never place different photographs of the same participant into both train and test splits:
+---
+
+## 14-Step Clinical Data Collection & Ingestion Workflow
+
 ```text
-Participant A (Image 1)  ──> TRAIN  ❌ INVALID DATA LEAKAGE
-Participant A (Image 2)  ──> TEST   ❌ INVALID DATA LEAKAGE
-```
-*Why forbidden?* The model will memorize participant-specific background skin color, iris patterns, or facial geometry, yielding artificially inflated test accuracy that fails completely in real clinical deployment.
-
-### ✅ MANDATORY (Participant-Level Split)
-Partition participants holistically before extracting image samples:
-```text
-TRAIN SET
-  ├── Participant A (Images 1, 2, 3)
-  ├── Participant B (Images 1, 2)
-  └── Participant C (Images 1, 2, 3, 4)
-
-VALIDATION SET
-  └── Participant D (Images 1, 2)
-
-TEST SET (Strictly Held-Out)
-  └── Participant E (Images 1, 2, 3)
+STEP 1: Participant Registration
+   │
+STEP 2: Consent Verification
+   │
+STEP 3: Participant Metadata Recording
+   │
+STEP 4: Laboratory Hb Reference Blood Draw
+   │
+STEP 5: Capture Session Initialization
+   │
+STEP 6: Phone / Device Metadata Logging
+   │
+STEP 7: Lighting & Environment Metadata Logging
+   │
+STEP 8: Left-Eye Image Capture (Burst Mode)
+   │
+STEP 9: Right-Eye Image Capture (Burst Mode)
+   │
+STEP 10: Immediate On-Device Image Quality Gate
+   │
+STEP 11: Laboratory-Reference Linkage
+   │
+STEP 12: Independent Data Quality & Referential Integrity Review
+   │
+STEP 13: Encrypted Secure Storage & PII Scrubbing
+   │
+STEP 14: Dataset Versioning & Participant-Isolated Splitting
 ```
 
 ---
 
-## 3. Privacy & Storage Compliance
+### Step Detail Specifications
 
-1. **Local Exclusion**: Raw dataset directories (`dataset/raw/`, `dataset/private/`) are ignored by `.gitignore`.
-2. **No Patient PII**: Patient names, hospital ID numbers, and direct face images MUST NOT be stored in Git or public repositories.
+#### STEP 1 — Participant Registration
+Assign a unique pseudonymous `participant_id` (e.g. `HV-P-1002`). Master key linking real patient identity to `participant_id` remains offline in encrypted hospital database.
+
+#### STEP 2 — Consent Verification
+Verify documented informed consent under an IEC/IRB-approved protocol (`consent_status = "verified_active"`).
+
+#### STEP 3 — Participant Metadata
+Record `age_years`, `sex`, `pregnancy_status`, `smoking_status`, `skin_phototype`, `residence_altitude_m`, and comorbidities according to the [Data Dictionary](file:///d:/hemovision/docs/data-dictionary.md).
+
+#### STEP 4 — Laboratory Hb Reference Measurement
+Perform venous blood draw or microcuvette capillary sampling. Record `laboratory_hb_g_dl`, `measurement_timestamp`, `measurement_method`, and instrument specifications.
+
+#### STEP 5 — Capture Session Initialization
+Generate a unique `session_id` linking operator, device, location, and timestamp.
+
+#### STEP 6 — Phone / Device Metadata
+Log `phone_manufacturer`, `phone_model`, `camera_lens_type`, and pseudonymous `device_id`. Never record IMEI or hardware serials.
+
+#### STEP 7 — Lighting / Environment Metadata
+Log `capture_environment`, `lighting_condition`, `ambient_lux` (if illuminance sensor available), and `color_temperature_kelvin`.
+
+#### STEP 8 — Left-Eye Capture
+Pull down left lower eyelid to evert palpebral mucosa. Capture a 3–5 frame burst image sequence under controlled framing.
+
+#### STEP 9 — Right-Eye Capture
+Pull down right lower eyelid to evert palpebral mucosa. Capture a 3–5 frame burst image sequence under controlled framing.
+
+#### STEP 10 — Image Quality Check
+Run automated sharpness (`focus_score`) and exposure (`exposure_info`) gates. Reject unusable frames (`rejected_blur`, `rejected_exposure`).
+
+#### STEP 11 — Laboratory-Reference Linkage
+Link `lab_measurement_id` to `participant_id` and compute `time_delta_minutes` between image capture and blood draw.
+
+#### STEP 12 — Data Quality Review
+Execute deterministic metadata validation using `ml/src/data/validate_dataset.py` to confirm referential integrity and zero duplicate IDs.
+
+#### STEP 13 — Secure Storage
+Transfer anonymized image files and JSON metadata to encrypted HIPAA/GDPR-compliant cloud/server storage.
+
+#### STEP 14 — Dataset Versioning & Splitting
+Assign dataset release version tag (e.g. `v0.1.0`) and partition participants into TRAIN, VALIDATION, and TEST sets enforcing strict participant-level isolation.
