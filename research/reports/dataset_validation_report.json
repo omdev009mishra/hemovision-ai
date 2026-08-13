@@ -1,0 +1,22 @@
+{
+  "summary": {
+    "total_records": 1,
+    "total_participants": 1,
+    "total_sessions": 1,
+    "total_images": 1,
+    "error_count": 0,
+    "warning_count": 1,
+    "is_valid": true,
+    "status_label": "VALIDATION PASSED WITH WARNINGS",
+    "is_sufficient_for_ml_eval": false
+  },
+  "issues": [
+    {
+      "check_id": 13,
+      "check_name": "Participant Count Sufficiency",
+      "severity": "WARNING",
+      "entity_id": "DATASET",
+      "message": "Insufficient participants (N=1) for meaningful train/validation/test evaluation."
+    }
+  ]
+}

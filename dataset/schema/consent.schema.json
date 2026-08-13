@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ConsentRecord",
+  "type": "object",
+  "required": [
+    "consent_id",
+    "participant_id",
+    "consent_version",
+    "consent_timestamp",
+    "consent_status"
+  ],
+  "properties": {
+    "consent_id": {
+      "type": "string",
+      "pattern": "^HV-CNS-[A-Z0-9]{8,12}$",
+      "description": "Unique pseudonymous consent record ID"
+    },
+    "participant_id": {
+      "type": "string",
+      "pattern": "^(HV-P-[A-Z0-9-]+|SYNTHETIC-P[0-9]+)$",
+      "description": "Pseudonymous participant ID"
+    },
+    "consent_version": {
+      "type": "string",
+      "description": "Approved study consent protocol version"
+    },
+    "consent_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of consent execution"
+    },
+    "consent_status": {
+      "type": "string",
+      "enum": ["given", "withdrawn", "pending"],
+      "description": "Current status of participant consent"
+    },
+    "withdrawal_status": {
+      "type": "string",
+      "enum": ["active", "withdrawn"],
+      "default": "active"
+    },
+    "withdrawal_timestamp": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "Pseudonymous study operator ID"
+    }
+  },
+  "additionalProperties": false
+}

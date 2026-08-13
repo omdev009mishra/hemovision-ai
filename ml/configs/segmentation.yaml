@@ -1,0 +1,64 @@
+# HemoVision — Phase 7 Conjunctiva Segmentation Configuration
+
+version: "1.0.0"
+method: "classical_cv"
+
+# Input image normalization parameters
+input:
+  target_width: 512
+  target_height: 512
+
+# Color-space thresholding parameters
+color_space:
+  # CIELAB a* channel threshold (emphasizes mucosal redness)
+  lab_a_min: 135
+  lab_a_max: 255
+
+  # HSV Primary Red Range
+  hsv_red1:
+    hue_min: 0
+    hue_max: 25
+    sat_min: 30
+    sat_max: 255
+    val_min: 40
+    val_max: 255
+
+  # HSV Secondary Red Range (wrap-around near 180)
+  hsv_red2:
+    hue_min: 160
+    hue_max: 180
+    sat_min: 30
+    sat_max: 255
+    val_min: 40
+    val_max: 255
+
+  # RGB R/G ratio threshold
+  rg_ratio_min: 1.15
+
+# Morphological refinement parameters
+morphology:
+  kernel_size: 5
+  open_iterations: 1
+  close_iterations: 1
+  dilation_iterations: 0
+
+# Connected component filtering constraints
+component_filtering:
+  min_component_area_pixels: 100
+  max_component_area_ratio: 0.35
+  min_aspect_ratio: 0.5
+  max_aspect_ratio: 6.0
+
+# Spatial ROI constraints (lower eyelid palpebral conjunctiva region assumption)
+roi_constraints:
+  y_start_ratio: 0.15
+  y_end_ratio: 0.95
+  x_start_ratio: 0.05
+  x_end_ratio: 0.95
+
+# Quality Gate parameters
+quality_gate:
+  min_roi_area_pixels: 100
+  max_roi_area_ratio: 0.45
+  min_conjunctival_coverage: 0.005
+  max_skin_sclera_ratio: 0.85

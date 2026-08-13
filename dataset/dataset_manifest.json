@@ -1,0 +1,32 @@
+{
+  "dataset_version": "1.0.0",
+  "dataset_type": "synthetic",
+  "creation_timestamp": "2026-08-13T18:01:53.151574+00:00",
+  "random_seed": 42,
+  "counts": {
+    "participant_count": 1,
+    "session_count": 1,
+    "image_count": 1,
+    "lab_measurement_count": 1,
+    "annotation_count": 0
+  },
+  "splits": {
+    "is_sufficient_for_ml_eval": false,
+    "train": {
+      "participant_count": 1,
+      "image_count": 1
+    },
+    "val": {
+      "participant_count": 0,
+      "image_count": 0
+    },
+    "test": {
+      "participant_count": 0,
+      "image_count": 0
+    }
+  },
+  "governance": {
+    "has_governed_clinical_declaration": false,
+    "clinical_training_allowed": false
+  }
+}
