@@ -1,62 +1,61 @@
 """
-HemoVision — Phase 3: Palpebral Conjunctiva Localization & Segmentation
+HemoVision — Phase 7: Palpebral Conjunctiva Localization & Segmentation
 
-Implements classical baseline computer vision algorithms (HSV/LAB color-space thresholding,
-morphological operations, and spatial region constraints) for isolating the palpebral
-conjunctiva (inner lower eyelid) from ocular/facial images.
-
-Output format supports binary masks, bounding boxes, cropped ROIs, segmentation metrics (IoU, Dice),
-and color visual overlays. Designed to easily interface with future deep learning (U-Net) backends.
+Modular architecture supporting classical computer vision baselines (ClassicalCVSegmenter / ConjunctivaSegmenter)
+and extensible interfaces for future deep learning segmentation models (UNet, MobileNet).
 """
 
-from dataclasses import dataclass
-from typing import Tuple, Dict, Any, Optional
+from abc import ABC, abstractmethod
+from pathlib import Path
+import time
+from typing import Dict, Any, Optional, Tuple
+try:
+    import yaml
+except ImportError:
+    yaml = None
 import numpy as np
 import cv2
 
-
-@dataclass
-class SegmentationResult:
-    """Container for palpebral conjunctiva segmentation outputs."""
-    mask: np.ndarray  # Binary mask uint8 [H, W], values {0, 255}
-    roi_crop: np.ndarray  # Bounding-box cropped RGB image [H_roi, W_roi, 3]
-    bounding_box: Tuple[int, int, int, int]  # (x, y, width, height)
-    roi_area_pixels: int  # Count of foreground conjunctiva pixels
-    coverage_ratio: float  # Fraction of image occupied by conjunctiva ROI
-    quality_metrics: Dict[str, float]  # Metrics dictionary (compactness, aspect ratio, mean red intensity)
-    visual_overlay: np.ndarray  # RGB visualization with green mask contour and red ROI bounding box
+from ml.src.segmentation.segmentation_result import SegmentationResult
+from ml.src.segmentation.eye_detector import EyeDetector
+from ml.src.segmentation.eyelid_detector import EyelidDetector
+from ml.src.segmentation.morphological_refinement import MorphologicalRefiner
+from ml.src.segmentation.roi_extractor import ROIExtractor
+from ml.src.segmentation.visualization import SegmentationVisualizer
 
 
 def calculate_iou(mask_pred: np.ndarray, mask_true: np.ndarray) -> float:
     """Calculate Intersection over Union (IoU / Jaccard Index) between binary masks."""
-    pred_bool = (mask_pred > 127)
-    true_bool = (mask_true > 127)
-    intersection = np.logical_and(pred_bool, true_bool).sum()
-    union = np.logical_or(pred_bool, true_bool).sum()
-    if union == 0:
-        return 1.0 if intersection == 0 else 0.0
-    return float(intersection / union)
+    from ml.src.evaluation.segmentation_metrics import calculate_iou as calc_iou
+    val = calc_iou(mask_pred, mask_true)
+    return float(val) if val is not None else 0.0
 
 
 def calculate_dice(mask_pred: np.ndarray, mask_true: np.ndarray) -> float:
     """Calculate Dice Similarity Coefficient (DSC) between binary masks."""
-    pred_bool = (mask_pred > 127)
-    true_bool = (mask_true > 127)
-    intersection = np.logical_and(pred_bool, true_bool).sum()
-    total_pixels = pred_bool.sum() + true_bool.sum()
-    if total_pixels == 0:
-        return 1.0
-    return float(2.0 * intersection / total_pixels)
+    from ml.src.evaluation.segmentation_metrics import calculate_dice as calc_dice
+    val = calc_dice(mask_pred, mask_true)
+    return float(val) if val is not None else 0.0
 
 
-class ConjunctivaSegmenter:
+class AbstractSegmenter(ABC):
+    """Abstract base interface for palpebral conjunctiva segmentation models."""
+
+    @abstractmethod
+    def segment(self, image_rgb: np.ndarray) -> SegmentationResult:
+        pass
+
+
+class ClassicalCVSegmenter(AbstractSegmenter):
     """
-    Palpebral conjunctiva localization and semantic segmentation engine.
-    Uses adaptive color-space segmentation (HSV + LAB a* channel) and spatial constraints.
+    Classical Computer Vision baseline for lower palpebral conjunctiva segmentation.
+    Combines multi-colorspace thresholding (CIELAB a*, HSV H/S/V), morphological operations,
+    and connected-component spatial filtering.
     """
 
     def __init__(
         self,
+        config_path: Optional[str] = "ml/configs/segmentation.yaml",
         min_hue: int = 0,
         max_hue: int = 25,
         min_sat: int = 30,
@@ -67,138 +66,158 @@ class ConjunctivaSegmenter:
         morph_kernel_size: int = 5,
         min_roi_area: int = 100,
     ):
-        self.min_hue = min_hue
-        self.max_hue = max_hue
-        self.min_sat = min_sat
-        self.max_sat = max_sat
-        self.min_val = min_val
-        self.max_val = max_val
-        self.min_a_star = min_a_star
-        self.morph_kernel_size = morph_kernel_size
-        self.min_roi_area = min_roi_area
+        self.config = {}
+        if config_path and Path(config_path).exists() and yaml is not None:
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    self.config = yaml.safe_load(f) or {}
+            except Exception:
+                self.config = {}
+
+        cs_cfg = self.config.get("color_space", {})
+        hsv1_cfg = cs_cfg.get("hsv_red1", {})
+        hsv2_cfg = cs_cfg.get("hsv_red2", {})
+        morph_cfg = self.config.get("morphology", {})
+        comp_cfg = self.config.get("component_filtering", {})
+        roi_cfg = self.config.get("roi_constraints", {})
+        q_cfg = self.config.get("quality_gate", {})
+
+        # Color Space bounds (override with explicit init arguments if non-default)
+        self.min_a_star = min_a_star if min_a_star != 135 else cs_cfg.get("lab_a_min", 135)
+
+        self.min_hue1 = min_hue if min_hue != 0 else hsv1_cfg.get("hue_min", 0)
+        self.max_hue1 = max_hue if max_hue != 25 else hsv1_cfg.get("hue_max", 25)
+        self.min_sat1 = min_sat if min_sat != 30 else hsv1_cfg.get("sat_min", 30)
+        self.max_sat1 = max_sat if max_sat != 255 else hsv1_cfg.get("sat_max", 255)
+        self.min_val1 = min_val if min_val != 40 else hsv1_cfg.get("val_min", 40)
+        self.max_val1 = max_val if max_val != 255 else hsv1_cfg.get("val_max", 255)
+
+        self.min_hue2 = hsv2_cfg.get("hue_min", 160)
+        self.max_hue2 = hsv2_cfg.get("hue_max", 180)
+        self.min_sat2 = hsv2_cfg.get("sat_min", self.min_sat1)
+        self.max_sat2 = hsv2_cfg.get("sat_max", self.max_sat1)
+        self.min_val2 = hsv2_cfg.get("val_min", self.min_val1)
+        self.max_val2 = hsv2_cfg.get("val_max", self.max_val1)
+
+        # Detectors & Refiners
+        self.eye_detector = EyeDetector()
+        self.eyelid_detector = EyelidDetector(
+            y_start_ratio=roi_cfg.get("y_start_ratio", 0.15),
+            y_end_ratio=roi_cfg.get("y_end_ratio", 0.95)
+        )
+        self.morph_refiner = MorphologicalRefiner(
+            kernel_size=morph_cfg.get("kernel_size", morph_kernel_size),
+            min_component_area=comp_cfg.get("min_component_area_pixels", min_roi_area),
+            max_component_area_ratio=comp_cfg.get("max_component_area_ratio", 0.35),
+            min_aspect_ratio=comp_cfg.get("min_aspect_ratio", 0.5),
+            max_aspect_ratio=comp_cfg.get("max_aspect_ratio", 6.0),
+        )
+        self.roi_extractor = ROIExtractor(
+            min_area_pixels=q_cfg.get("min_roi_area_pixels", min_roi_area),
+            max_area_ratio=q_cfg.get("max_roi_area_ratio", 0.45)
+        )
 
     def segment(self, image_rgb: np.ndarray) -> SegmentationResult:
         """
-        Segment the palpebral conjunctiva from an RGB input image.
-
-        Args:
-            image_rgb: RGB image numpy array of shape [H, W, 3], uint8.
-
-        Returns:
-            SegmentationResult object containing mask, cropped ROI, bounding box, and metrics.
+        Executes classical CV segmentation pipeline and measures runtime.
         """
+        start_time = time.perf_counter()
+
         if image_rgb is None or image_rgb.size == 0 or len(image_rgb.shape) != 3:
             raise ValueError("Input image must be a non-empty 3-channel uint8 array.")
 
         height, width, _ = image_rgb.shape
-        total_pixels = height * width
 
-        # 1. Convert to HSV color space for hue/saturation filtering of mucosal red/pink tones
+        # 1. Eye Region Detection
+        eye_res = self.eye_detector.detect(image_rgb)
+        if not eye_res.success:
+            elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+            return SegmentationResult(
+                success=False,
+                mask=np.zeros((height, width), dtype=np.uint8),
+                bounding_box=(0, 0, width, height),
+                roi_image=image_rgb.copy(),
+                roi_area_pixels=0,
+                roi_area_ratio=0.0,
+                segmentation_quality=0.0,
+                failure_reason=eye_res.failure_reason or "eye_not_detected",
+                method="classical_cv",
+                quality_flags={"eye_detected": False},
+                processing_time_ms=elapsed_ms
+            )
+
+        # 2. Lower Eyelid Candidate Localization
+        eyelid_res = self.eyelid_detector.detect_lower_eyelid(image_rgb, eye_res.bounding_box)
+
+        # 3. Colorspace Analysis (HSV + CIELAB a*)
         hsv = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2HSV)
-        
-        # Lower and upper bounds for red/pink mucosa in HSV
-        lower_red1 = np.array([0, self.min_sat, self.min_val], dtype=np.uint8)
-        upper_red1 = np.array([self.max_hue, self.max_sat, self.max_val], dtype=np.uint8)
-        
-        lower_red2 = np.array([160, self.min_sat, self.min_val], dtype=np.uint8)
-        upper_red2 = np.array([180, self.max_sat, self.max_val], dtype=np.uint8)
+        lower_red1 = np.array([self.min_hue1, self.min_sat1, self.min_val1], dtype=np.uint8)
+        upper_red1 = np.array([self.max_hue1, self.max_sat1, self.max_val1], dtype=np.uint8)
+        lower_red2 = np.array([self.min_hue2, self.min_sat2, self.min_val2], dtype=np.uint8)
+        upper_red2 = np.array([self.max_hue2, self.max_sat2, self.max_val2], dtype=np.uint8)
 
         mask_hsv1 = cv2.inRange(hsv, lower_red1, upper_red1)
         mask_hsv2 = cv2.inRange(hsv, lower_red2, upper_red2)
         mask_hsv = cv2.bitwise_or(mask_hsv1, mask_hsv2)
 
-        # 2. Convert to CIELAB color space for redness emphasis (a* channel)
         lab = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2LAB)
         a_channel = lab[:, :, 1]
         _, mask_lab = cv2.threshold(a_channel, self.min_a_star, 255, cv2.THRESH_BINARY)
 
-        # Combined color mask
-        raw_mask = cv2.bitwise_and(mask_hsv, mask_lab)
+        color_mask = cv2.bitwise_and(mask_hsv, mask_lab)
+        candidate_color_mask = cv2.bitwise_and(color_mask, eyelid_res.candidate_mask)
 
-        # 3. Apply Morphological Cleanup (Opening then Closing)
-        kernel = cv2.getStructuringElement(
-            cv2.MORPH_ELLIPSE, (self.morph_kernel_size, self.morph_kernel_size)
-        )
-        opened_mask = cv2.morphologyEx(raw_mask, cv2.MORPH_OPEN, kernel)
-        closed_mask = cv2.morphologyEx(opened_mask, cv2.MORPH_CLOSE, kernel)
+        # 4. Morphological Refinement & Component Filtering
+        refined_mask = self.morph_refiner.refine(candidate_color_mask)
 
-        # 4. Spatial ROI Constraint (Prioritize lower portion of image where lower eyelid palpebral conjunctiva rests)
-        spatial_mask = np.zeros_like(closed_mask)
-        # Eyelid region constraint: middle-to-lower region [20% to 90% height]
-        y_start = int(height * 0.15)
-        y_end = int(height * 0.95)
-        x_start = int(width * 0.05)
-        x_end = int(width * 0.95)
-        spatial_mask[y_start:y_end, x_start:x_end] = 255
+        # 5. ROI Extraction & Quality Gate Evaluation
+        roi_res = self.roi_extractor.extract(image_rgb, refined_mask)
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
 
-        constrained_mask = cv2.bitwise_and(closed_mask, spatial_mask)
+        if not roi_res.success:
+            return SegmentationResult(
+                success=False,
+                mask=refined_mask,
+                bounding_box=roi_res.bounding_box,
+                roi_image=roi_res.roi_image,
+                roi_area_pixels=roi_res.roi_area_pixels,
+                roi_area_ratio=roi_res.roi_area_ratio,
+                segmentation_quality=0.0,
+                failure_reason=roi_res.failure_reason or "segmentation_failed",
+                method="classical_cv",
+                quality_flags=roi_res.quality_flags,
+                processing_time_ms=elapsed_ms
+            )
 
-        # 5. Extract Contours and select largest valid palpebral conjunctiva ROI
-        contours, _ = cv2.findContours(constrained_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Generate Visual Overlay
+        overlay = SegmentationVisualizer.create_overlay(image_rgb, refined_mask, roi_res.bounding_box)
 
-        final_mask = np.zeros((height, width), dtype=np.uint8)
-        bbox = (0, 0, width, height)
-        roi_area = 0
-
-        if contours:
-            # Filter contours by area and sort descending
-            valid_contours = [c for c in contours if cv2.contourArea(c) >= self.min_roi_area]
-            if valid_contours:
-                largest_contour = max(valid_contours, key=cv2.contourArea)
-                cv2.drawContours(final_mask, [largest_contour], -1, 255, thickness=cv2.FILLED)
-                x, y, w, h = cv2.boundingRect(largest_contour)
-                bbox = (int(x), int(y), int(w), int(h))
-                roi_area = int(cv2.contourArea(largest_contour))
-            else:
-                # Fallback to constrained mask if no contour passes minimum area
-                final_mask = constrained_mask
-                roi_area = int(np.sum(final_mask > 0))
-                x, y, w, h = cv2.boundingRect(final_mask) if roi_area > 0 else (0, 0, width, height)
-                bbox = (int(x), int(y), int(w), int(h))
-        else:
-            final_mask = constrained_mask
-            roi_area = int(np.sum(final_mask > 0))
-            if roi_area > 0:
-                x, y, w, h = cv2.boundingRect(final_mask)
-                bbox = (int(x), int(y), int(w), int(h))
-
-        # Crop ROI image
-        bx, by, bw, bh = bbox
-        if bw > 0 and bh > 0:
-            roi_crop = image_rgb[by:by+bh, bx:bx+bw].copy()
-        else:
-            roi_crop = image_rgb.copy()
-
-        coverage_ratio = float(roi_area / total_pixels)
-
-        # Calculate quality metrics
-        aspect_ratio = float(bw / bh) if bh > 0 else 1.0
-        compactness = float(4.0 * np.pi * roi_area / (perimeter ** 2)) if (contours and (perimeter := cv2.arcLength(max(contours, key=cv2.contourArea), True)) > 0) else 0.0
-
-        quality_metrics = {
-            "roi_area_pixels": float(roi_area),
-            "coverage_ratio": coverage_ratio,
-            "aspect_ratio": aspect_ratio,
-            "compactness": compactness,
-        }
-
-        # 6. Generate Visual Overlay
-        visual_overlay = image_rgb.copy()
-        # Draw semi-transparent green mask overlay over detected ROI
-        green_overlay = visual_overlay.copy()
-        green_overlay[final_mask > 0] = [0, 220, 100]
-        cv2.addWeighted(green_overlay, 0.4, visual_overlay, 0.6, 0, visual_overlay)
-
-        # Draw red bounding box contour
-        if bw > 0 and bh > 0:
-            cv2.rectangle(visual_overlay, (bx, by), (bx + bw, by + bh), (255, 30, 30), 2)
+        # Algorithmic Segmentation Quality Score
+        quality_score = min(1.0, float(0.4 * eye_res.eye_region_quality + 0.6 * min(1.0, roi_res.roi_area_ratio / 0.15)))
 
         return SegmentationResult(
-            mask=final_mask,
-            roi_crop=roi_crop,
-            bounding_box=bbox,
-            roi_area_pixels=roi_area,
-            coverage_ratio=coverage_ratio,
-            quality_metrics=quality_metrics,
-            visual_overlay=visual_overlay,
+            success=True,
+            mask=refined_mask,
+            bounding_box=roi_res.bounding_box,
+            roi_image=roi_res.roi_image,
+            roi_area_pixels=roi_res.roi_area_pixels,
+            roi_area_ratio=roi_res.roi_area_ratio,
+            segmentation_quality=round(quality_score, 4),
+            failure_reason=None,
+            method="classical_cv",
+            quality_flags=roi_res.quality_flags,
+            processing_time_ms=elapsed_ms,
+            visual_overlay=overlay
         )
+
+
+# Alias ConjunctivaSegmenter to ClassicalCVSegmenter for backward compatibility
+ConjunctivaSegmenter = ClassicalCVSegmenter
+
+
+def create_segmenter(method: str = "classical_cv", config_path: str = "ml/configs/segmentation.yaml") -> ClassicalCVSegmenter:
+    """Factory function creating a segmenter instance."""
+    if method == "classical_cv":
+        return ClassicalCVSegmenter(config_path=config_path)
+    else:
+        raise ValueError(f"Unknown segmentation method: '{method}'. Supported methods: ['classical_cv']")

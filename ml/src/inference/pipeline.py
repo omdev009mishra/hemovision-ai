@@ -1,8 +1,7 @@
 """
-HemoVision — Phase 8: Unified End-to-End Inference Pipeline
-
-Executes Quality Assessment -> Segmentation -> Color Preprocessing -> Feature Extraction
--> ML Hb Estimation -> Conformal Interval Gating -> Visual Overlay Generation.
+HemoVision — End-to-End Inference Pipeline
+Executes Quality Assessment -> Conjunctiva Segmentation -> Color Calibration -> Feature Extraction -> ML Hb Estimation.
+Gates downstream feature extraction when quality OR segmentation fails.
 """
 
 from dataclasses import dataclass, asdict
@@ -12,7 +11,7 @@ import cv2
 import numpy as np
 
 from ml.src.quality.quality_assessment import ResearchQualityAssessor, QualityAssessmentResult
-from ml.src.segmentation.conjunctiva_segmenter import ConjunctivaSegmenter, SegmentationResult
+from ml.src.segmentation.conjunctiva_segmenter import create_segmenter, SegmentationResult
 from ml.src.preprocessing.color_calibration import ColorCalibrator, CalibrationResult
 from ml.src.models.feature_extractor import FeatureExtractor, FeatureVector
 from ml.src.models.hb_estimator import HbEstimator, ModelPrediction
@@ -55,7 +54,7 @@ class InferencePipeline:
 
     def __init__(self, model_path: Optional[str] = None):
         self.quality_assessor = ResearchQualityAssessor()
-        self.segmenter = ConjunctivaSegmenter()
+        self.segmenter = create_segmenter("classical_cv")
         self.calibrator = ColorCalibrator(method="gray_world")
         self.feature_extractor = FeatureExtractor()
         self.hb_estimator = HbEstimator(model_path=model_path)
@@ -80,7 +79,8 @@ class InferencePipeline:
         seg_res: SegmentationResult = self.segmenter.segment(image_rgb)
 
         # Base64 encode visual overlay and cropped ROI
-        overlay_b64 = _array_to_b64_jpeg(seg_res.visual_overlay)
+        overlay = seg_res.visual_overlay if seg_res.visual_overlay is not None else image_rgb
+        overlay_b64 = _array_to_b64_jpeg(overlay)
         roi_b64 = _array_to_b64_jpeg(seg_res.roi_crop)
 
         # If quality is rejected, return early with quality gate failure details
@@ -96,7 +96,7 @@ class InferencePipeline:
                     "underexposure_ratio": quality_res.underexposure_ratio,
                     "specular_ratio": quality_res.specular_ratio,
                 },
-                segmentation_details=seg_res.quality_metrics,
+                segmentation_details=seg_res.to_dict(),
                 feature_summary={},
                 estimated_hb_g_dl=None,
                 prediction_interval=None,
@@ -104,6 +104,31 @@ class InferencePipeline:
                 reliability_score=None,
                 research_category="Quality Gate Failure",
                 disclaimer="Image rejected due to quality heuristics (blur/exposure). Please recapture.",
+                visual_overlay_b64=overlay_b64,
+                roi_crop_b64=roi_b64,
+            )
+
+        # If segmentation fails, return early with segmentation failure details
+        if not seg_res.success:
+            return InferenceResult(
+                is_usable=False,
+                quality_score=quality_res.quality_score,
+                rejection_reasons=("segmentation_failed",),
+                quality_details={
+                    "focus_score": quality_res.focus_score,
+                    "mean_intensity": quality_res.mean_intensity,
+                    "overexposure_ratio": quality_res.overexposure_ratio,
+                    "underexposure_ratio": quality_res.underexposure_ratio,
+                    "specular_ratio": quality_res.specular_ratio,
+                },
+                segmentation_details=seg_res.to_dict(),
+                feature_summary={},
+                estimated_hb_g_dl=None,
+                prediction_interval=None,
+                confidence_level=None,
+                reliability_score=None,
+                research_category="Segmentation Failure",
+                disclaimer="Palpebral conjunctiva ROI could not be reliably localized.",
                 visual_overlay_b64=overlay_b64,
                 roi_crop_b64=roi_b64,
             )
@@ -128,7 +153,7 @@ class InferencePipeline:
                 "underexposure_ratio": quality_res.underexposure_ratio,
                 "specular_ratio": quality_res.specular_ratio,
             },
-            segmentation_details=seg_res.quality_metrics,
+            segmentation_details=seg_res.to_dict(),
             feature_summary={
                 "redness_index": round(feature_vec.redness_index, 4),
                 "erythema_index": round(feature_vec.erythema_index, 4),

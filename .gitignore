@@ -44,6 +44,7 @@ dataset/metadata/*
 dataset/samples/*
 !dataset/samples/.gitkeep
 !dataset/samples/synthetic_eye_001.png
+!dataset/samples/segmentation/*
 *.dicom
 *.dcm
 *.svs
