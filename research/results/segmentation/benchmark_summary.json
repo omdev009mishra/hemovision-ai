@@ -1,0 +1,14 @@
+{
+  "dataset_type": "SYNTHETIC",
+  "clinical_validation": "NOT PERFORMED",
+  "total_images": 7,
+  "successful_segmentations": 1,
+  "failed_segmentations": 6,
+  "success_rate": 0.1429,
+  "mean_iou": 0.9983,
+  "mean_dice": 0.9991,
+  "mean_precision": 1.0,
+  "mean_recall": 0.9983,
+  "median_processing_time_ms": 1.98,
+  "note": "SOFTWARE VALIDATION ONLY \u2014 NOT CLINICAL PERFORMANCE"
+}

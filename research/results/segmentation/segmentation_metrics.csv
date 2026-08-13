@@ -1,0 +1,8 @@
+image_name,success,failure_reason,roi_area_pixels,roi_area_ratio,segmentation_quality,processing_time_ms,has_ground_truth,iou,dice,precision,recall,pixel_accuracy
+blurry_eye.png,False,eye_not_detected,0,0.0,0.0,2.58,False,,,,,
+dark_eye.png,False,eye_not_detected,0,0.0,0.0,1.19,False,,,,,
+incorrect_framing.png,False,eye_not_detected,0,0.0,0.0,1.82,False,,,,,
+no_eye.png,False,eye_not_detected,0,0.0,0.0,0.96,False,,,,,
+occluded_eye.png,False,segmentation_failed,0,0.0,0.0,83.99,False,,,,,
+overexposed_eye.png,False,eye_not_detected,0,0.0,0.0,1.98,False,,,,,
+synthetic_eye_001.png,True,,5873,0.0224,0.4098,4.5,True,0.9983,0.9991,1.0,0.9983,1.0

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hemovision.ai/schemas/annotations.schema.json",
+  "title": "AnnotationRecord",
+  "description": "Schema for segmentation mask annotations, quality labels, and review status.",
+  "type": "object",
+  "properties": {
+    "annotation_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{3,64}$",
+      "description": "Unique annotation record identifier."
+    },
+    "image_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{3,64}$",
+      "description": "Image record identifier."
+    },
+    "annotator_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{3,64}$",
+      "description": "Pseudonymous annotator / expert identifier."
+    },
+    "annotation_version": {
+      "type": "string",
+      "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Annotation protocol/tool version string (e.g. v1.0.0)."
+    },
+    "conjunctiva_mask_path": {
+      "type": "string",
+      "description": "Relative file path to binary/COCO segmentation mask."
+    },
+    "quality_label": {
+      "type": "string",
+      "enum": ["high_quality", "acceptable", "poor_quality", "unusable"],
+      "description": "Expert visual quality rating."
+    },
+    "occlusion_label": {
+      "type": "string",
+      "enum": ["none", "finger_occlusion", "eyelash_occlusion", "specular_reflection", "multiple_occlusions"],
+      "description": "Primary visual obstruction present."
+    },
+    "annotation_status": {
+      "type": "string",
+      "enum": ["draft", "submitted", "approved", "rejected"],
+      "description": "Annotation workflow status."
+    },
+    "review_status": {
+      "type": "string",
+      "enum": ["pending_peer_review", "peer_reviewed_approved", "peer_reviewed_rejected"],
+      "description": "Clinical/expert review verification status."
+    }
+  },
+  "required": [
+    "annotation_id",
+    "image_id",
+    "annotator_id",
+    "annotation_version",
+    "conjunctiva_mask_path",
+    "quality_label",
+    "occlusion_label",
+    "annotation_status",
+    "review_status"
+  ],
+  "additionalProperties": false
+}

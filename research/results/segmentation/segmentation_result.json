@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "method": "classical_cv",
+  "bounding_box": [
+    153,
+    305,
+    207,
+    51
+  ],
+  "roi_area_pixels": 5873,
+  "roi_area_ratio": 0.0224,
+  "segmentation_quality": 0.4098,
+  "confidence": 0.4098,
+  "failure_reason": null,
+  "quality_flags": {
+    "has_roi": true,
+    "valid_area": true,
+    "connected_structure": true
+  },
+  "processing_time_ms": 80.26,
+  "input_image": "dataset\\samples\\segmentation\\synthetic_eye_001.png"
+}

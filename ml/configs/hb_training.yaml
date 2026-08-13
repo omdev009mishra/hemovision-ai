@@ -1,0 +1,34 @@
+dataset:
+  root: "dataset"
+  version: "1.0.0"
+
+split:
+  train_ratio: 0.70
+  validation_ratio: 0.15
+  test_ratio: 0.15
+  random_seed: 42
+
+target:
+  name: "laboratory_hb_g_dl"
+
+quality:
+  require_usable_images: true
+  min_focus_score: 100.0
+  max_overexposed_ratio: 0.15
+  max_underexposed_ratio: 0.15
+
+features:
+  version: "1.0.0"
+  feature_count: 28
+
+models:
+  enabled:
+    - mean
+    - linear_regression
+    - ridge
+    - random_forest
+    - gradient_boosting
+
+training:
+  random_seed: 42
+  cv_folds: 5
