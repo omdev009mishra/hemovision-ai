@@ -43,6 +43,7 @@ dataset/metadata/*
 !dataset/metadata/.gitkeep
 dataset/samples/*
 !dataset/samples/.gitkeep
+!dataset/samples/synthetic_eye_001.png
 *.dicom
 *.dcm
 *.svs

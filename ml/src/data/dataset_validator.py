@@ -41,9 +41,19 @@ class DatasetValidator:
                 message="No dataset records found in specified directory."
             ))
 
-        # Check 2: Participant ID uniqueness / format
+        # Check 2: Participant ID uniqueness & sufficiency
         participant_ids = [r.participant_id for r in records if r.participant_id != "UNKNOWN"]
-        
+        unique_pts = set(participant_ids)
+
+        if len(unique_pts) < 3:
+            issues.append(ValidationIssue(
+                check_id=13,
+                check_name="Participant Count Sufficiency",
+                severity="WARNING",
+                entity_id="DATASET",
+                message=f"Insufficient participants (N={len(unique_pts)}) for meaningful train/validation/test evaluation."
+            ))
+
         # Check 3: Session ID uniqueness
         session_ids = [r.session_id for r in records if r.session_id != "UNKNOWN"]
 
@@ -85,6 +95,8 @@ class DatasetValidator:
             # Check 6: Image existence & Check 7: Image readability
             if r.image_path:
                 img_file = self.root_dir / r.image_path
+                if not img_file.exists() and Path(r.image_path).exists():
+                    img_file = Path(r.image_path)
                 if not img_file.exists():
                     issues.append(ValidationIssue(
                         check_id=6,
@@ -104,14 +116,26 @@ class DatasetValidator:
                     message=f"Invalid quality status: {r.quality_status}"
                 ))
 
+        err_count = sum(1 for i in issues if i.severity == "ERROR")
+        warn_count = sum(1 for i in issues if i.severity == "WARNING")
+
+        if err_count > 0:
+            status_label = "VALIDATION FAILED"
+        elif warn_count > 0:
+            status_label = "VALIDATION PASSED WITH WARNINGS"
+        else:
+            status_label = "VALIDATION PASSED"
+
         summary = {
             "total_records": len(records),
-            "total_participants": len(set(participant_ids)),
+            "total_participants": len(unique_pts),
             "total_sessions": len(set(session_ids)),
             "total_images": len(set(image_ids)),
-            "error_count": sum(1 for i in issues if i.severity == "ERROR"),
-            "warning_count": sum(1 for i in issues if i.severity == "WARNING"),
-            "is_valid": sum(1 for i in issues if i.severity == "ERROR") == 0,
+            "error_count": err_count,
+            "warning_count": warn_count,
+            "is_valid": err_count == 0,
+            "status_label": status_label,
+            "is_sufficient_for_ml_eval": len(unique_pts) >= 3,
         }
 
         return issues, summary
@@ -136,13 +160,14 @@ class DatasetValidator:
             "# HemoVision Dataset Validation Report",
             "",
             "## Summary",
+            f"- **Validation Status**: `{summary['status_label']}`",
             f"- **Total Records**: {summary['total_records']}",
             f"- **Total Participants**: {summary['total_participants']}",
             f"- **Total Sessions**: {summary['total_sessions']}",
             f"- **Total Images**: {summary['total_images']}",
             f"- **Errors**: {summary['error_count']}",
             f"- **Warnings**: {summary['warning_count']}",
-            f"- **Validation Status**: {'PASSED' if summary['is_valid'] else 'FAILED'}",
+            f"- **Sufficient for Train/Val/Test Split**: {'YES' if summary['is_sufficient_for_ml_eval'] else 'NO (N < 3 participants)'}",
             "",
             "## Issues Logged",
         ]

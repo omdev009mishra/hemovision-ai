@@ -1,13 +1,14 @@
 # HemoVision Dataset Validation Report
 
 ## Summary
+- **Validation Status**: `VALIDATION PASSED WITH WARNINGS`
 - **Total Records**: 1
 - **Total Participants**: 1
 - **Total Sessions**: 1
 - **Total Images**: 1
 - **Errors**: 0
 - **Warnings**: 1
-- **Validation Status**: PASSED
+- **Sufficient for Train/Val/Test Split**: NO (N < 3 participants)
 
 ## Issues Logged
-- **[WARNING]** `Image Existence` (Entity: `SYNTHETIC-IMG001`): Image file does not exist on disk: dataset/samples/synthetic_eye_001.png
+- **[WARNING]** `Participant Count Sufficiency` (Entity: `DATASET`): Insufficient participants (N=1) for meaningful train/validation/test evaluation.

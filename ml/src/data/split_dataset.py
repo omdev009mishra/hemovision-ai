@@ -19,6 +19,10 @@ class DatasetSplitter:
         self.test_ratio = test_ratio
         self.random_seed = random_seed
 
+    def is_sufficient_for_ml_eval(self, participant_ids: List[str]) -> bool:
+        unique_participants = set(participant_ids)
+        return len(unique_participants) >= 3
+
     def split_participants(self, participant_ids: List[str]) -> Dict[str, Set[str]]:
         unique_participants = sorted(list(set(participant_ids)))
         rng = random.Random(self.random_seed)
@@ -27,13 +31,14 @@ class DatasetSplitter:
         n_total = len(unique_participants)
         if n_total == 0:
             return {"train": set(), "val": set(), "test": set()}
-        
-        # If very few participants (e.g. synthetic smoke test fixtures), partition gracefully
+
+        # For datasets with fewer than 3 participants, do NOT duplicate participants across sets.
+        # Place available participant(s) in train set, leaving val and test empty.
         if n_total < 3:
             return {
                 "train": set(unique_participants),
-                "val": set(unique_participants),
-                "test": set(unique_participants),
+                "val": set(),
+                "test": set(),
             }
 
         n_train = max(1, int(round(n_total * self.train_ratio)))
@@ -46,7 +51,7 @@ class DatasetSplitter:
         if not test_pts and len(val_pts) > 1:
             test_pts.add(val_pts.pop())
 
-        # Validate zero overlap
+        # Validate zero overlap strictly
         assert len(train_pts.intersection(val_pts)) == 0, "Leakage between TRAIN and VAL!"
         assert len(train_pts.intersection(test_pts)) == 0, "Leakage between TRAIN and TEST!"
         assert len(val_pts.intersection(test_pts)) == 0, "Leakage between VAL and TEST!"

@@ -23,6 +23,8 @@ class DatasetManifestGenerator:
         splitter = DatasetSplitter(random_seed=self.seed)
         split_records = splitter.split_records(records)
         split_pts = splitter.split_participants([r.participant_id for r in records])
+        all_pts = [r.participant_id for r in records]
+        sufficient = splitter.is_sufficient_for_ml_eval(all_pts)
 
         manifest = {
             "dataset_version": self.dataset_version,
@@ -30,13 +32,14 @@ class DatasetManifestGenerator:
             "creation_timestamp": datetime.now(timezone.utc).isoformat(),
             "random_seed": self.seed,
             "counts": {
-                "participant_count": len(set(r.participant_id for r in records)),
+                "participant_count": len(set(all_pts)),
                 "session_count": len(set(r.session_id for r in records)),
                 "image_count": len(records),
                 "lab_measurement_count": len(set(r.lab_measurement_id for r in records if r.lab_measurement_id != "UNKNOWN")),
                 "annotation_count": sum(1 for r in records if r.annotation_mask_path),
             },
             "splits": {
+                "is_sufficient_for_ml_eval": sufficient,
                 "train": {
                     "participant_count": len(split_pts["train"]),
                     "image_count": len(split_records["train"]),

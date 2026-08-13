@@ -1,8 +1,10 @@
 """
-Tests for HemoVision Training Pipeline & Config
+Tests for HemoVision Training Pipeline, Config, and Synthetic Fixtures
 """
 
 import pytest
+import os
+import cv2
 from pathlib import Path
 from ml.src.training.train_config import TrainingConfig
 from ml.src.training.train_pipeline import run_pipeline
@@ -19,6 +21,15 @@ def test_train_config_loading():
     assert "ridge" in config.enabled_models
 
 
+def test_synthetic_eye_image_fixture_loads():
+    fixture_path = Path("dataset/samples/synthetic_eye_001.png")
+    assert fixture_path.exists(), f"Synthetic image fixture missing at {fixture_path}"
+    
+    img = cv2.imread(str(fixture_path))
+    assert img is not None, f"Failed to load synthetic image fixture via OpenCV at {fixture_path}"
+    assert img.shape == (512, 512, 3), f"Expected 512x512x3 image, got {img.shape}"
+
+
 def test_dataset_loader_reads_samples():
     loader = DatasetLoader("dataset")
     records = loader.load_records()
@@ -32,6 +43,7 @@ def test_dataset_validator_runs():
     validator = DatasetValidator("dataset")
     issues, summary = validator.validate()
     assert "total_records" in summary
+    assert summary["status_label"] in ["VALIDATION PASSED", "VALIDATION PASSED WITH WARNINGS", "VALIDATION FAILED"]
     json_p, md_p = validator.generate_reports("research/reports")
     assert Path(json_p).exists()
     assert Path(md_p).exists()

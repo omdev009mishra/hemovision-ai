@@ -13,14 +13,35 @@ def test_participant_split_zero_leakage():
     splitter = DatasetSplitter(train_ratio=0.70, val_ratio=0.15, test_ratio=0.15, random_seed=42)
     splits = splitter.split_participants(pts)
 
-    train_pts = splits["train"]
-    val_pts = splits["val"]
-    test_pts = splits["test"]
+    train_pts = set(splits["train"])
+    val_pts = set(splits["val"])
+    test_pts = set(splits["test"])
 
-    assert len(train_pts.intersection(val_pts)) == 0
-    assert len(train_pts.intersection(test_pts)) == 0
-    assert len(val_pts.intersection(test_pts)) == 0
+    # Explicit non-intersection checks
+    assert train_pts.intersection(val_pts) == set()
+    assert train_pts.intersection(test_pts) == set()
+    assert val_pts.intersection(test_pts) == set()
     assert len(train_pts) + len(val_pts) + len(test_pts) == len(pts)
+
+
+def test_one_participant_synthetic_fixture_split_regression():
+    # Regression test for N=1 participant synthetic fixture
+    pts = ["SYNTHETIC-P001"]
+    splitter = DatasetSplitter(train_ratio=0.70, val_ratio=0.15, test_ratio=0.15, random_seed=42)
+    splits = splitter.split_participants(pts)
+
+    train_pts = set(splits["train"])
+    val_pts = set(splits["val"])
+    test_pts = set(splits["test"])
+
+    assert train_pts == {"SYNTHETIC-P001"}
+    assert val_pts == set()
+    assert test_pts == set()
+
+    assert train_pts.intersection(val_pts) == set()
+    assert train_pts.intersection(test_pts) == set()
+    assert val_pts.intersection(test_pts) == set()
+    assert not splitter.is_sufficient_for_ml_eval(pts)
 
 
 def test_group_cross_validator():

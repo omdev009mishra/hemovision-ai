@@ -1,7 +1,7 @@
 {
   "dataset_version": "1.0.0",
   "dataset_type": "synthetic",
-  "creation_timestamp": "2026-08-13T16:39:24.569853+00:00",
+  "creation_timestamp": "2026-08-13T17:53:48.034447+00:00",
   "random_seed": 42,
   "counts": {
     "participant_count": 1,
@@ -11,17 +11,18 @@
     "annotation_count": 0
   },
   "splits": {
+    "is_sufficient_for_ml_eval": false,
     "train": {
       "participant_count": 1,
       "image_count": 1
     },
     "val": {
-      "participant_count": 1,
-      "image_count": 1
+      "participant_count": 0,
+      "image_count": 0
     },
     "test": {
-      "participant_count": 1,
-      "image_count": 1
+      "participant_count": 0,
+      "image_count": 0
     }
   },
   "governance": {

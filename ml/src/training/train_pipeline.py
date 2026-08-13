@@ -49,7 +49,7 @@ def run_pipeline(config_path: str):
 
     has_clinical_data = manifest["governance"]["has_governed_clinical_declaration"]
 
-    exp_id = f"EXP-{datetime.now(timezone.utc).strftime('%Y%m%m-%H%M%S')}"
+    exp_id = f"EXP-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
     exp_dir = Path(f"research/experiments/{exp_id}")
     exp_dir.mkdir(parents=True, exist_ok=True)
 
