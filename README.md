@@ -74,6 +74,21 @@ User Result (Screening Category / Quality Alert)
 ## 5. Project Roadmap
 
 - [x] **Phase 0 — Repository Foundation**: Directory layout, clinical specs, dataset schemas, security guidelines, GitHub workflow, issue tracking.
+
+---
+
+## 6. Phase 0 Validation
+
+The Phase 0 repository foundation has been hardened and validated against automated quality gates:
+* **Draft 2020-12 JSON Schema Validation**: Strict verification of schema structure, required fields, properties, root object type, and Draft 2020-12 spec compliance using `Draft202012Validator`.
+* **Synthetic Fixture Validation**: Automated testing of fictional synthetic samples (`dataset/samples/`) validating clean pass behavior.
+* **Negative Schema Tests**: In-memory unit tests verifying that missing required fields, non-numeric values, or invalid enum categories are strictly rejected.
+* **Automated Pytest Verification**: 100% passing rate across `ml/tests/test_schemas.py`.
+* **GitHub Actions CI**: Continuous Integration workflow (`.github/workflows/ci.yml`) enforcing automated test execution on push and PR.
+* **Repository Security Verification**: Strict verification confirming zero real patient records, medical images, API keys, or environment secrets in version control.
+
+---
+
 - [ ] **Phase 1 — Dataset Specification**: Defining clinical data collection protocols, anonymization standards, and schemas.
 - [ ] **Phase 2 — Image Acquisition**: Protocols and smartphone camera prototype for standardized palpebral conjunctiva capture.
 - [ ] **Phase 3 — Conjunctiva Segmentation**: Deep learning & computer vision models for auto-segmenting the palpebral conjunctiva region of interest (ROI).

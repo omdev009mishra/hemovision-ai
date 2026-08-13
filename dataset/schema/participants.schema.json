@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hemovision.ai/schemas/participants.schema.json",
   "title": "ParticipantRecord",
   "description": "Schema for clinical study participant demographics, baseline physiological state, and confounding factors.",
@@ -7,8 +7,8 @@
   "properties": {
     "participant_id": {
       "type": "string",
-      "pattern": "^HV-P-[A-Za-z0-9]{4,12}$",
-      "description": "Pseudonymous participant identifier."
+      "pattern": "^[A-Za-z0-9_-]{3,64}$",
+      "description": "Pseudonymous or synthetic participant identifier."
     },
     "age": {
       "type": "integer",

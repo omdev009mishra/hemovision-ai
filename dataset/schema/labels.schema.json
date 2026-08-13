@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hemovision.ai/schemas/labels.schema.json",
   "title": "GroundTruthLabelRecord",
   "description": "Schema for clinical reference laboratory measurements and contextual anemia risk labels.",
@@ -7,12 +7,12 @@
   "properties": {
     "image_id": {
       "type": "string",
-      "pattern": "^HV-IMG-[A-Za-z0-9-]{4,36}$",
+      "pattern": "^[A-Za-z0-9_-]{3,64}$",
       "description": "Unique image record identifier."
     },
     "participant_id": {
       "type": "string",
-      "pattern": "^HV-P-[A-Za-z0-9]{4,12}$",
+      "pattern": "^[A-Za-z0-9_-]{3,64}$",
       "description": "Pseudonymous participant identifier."
     },
     "laboratory_hb_g_dl": {
