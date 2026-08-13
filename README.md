@@ -12,6 +12,16 @@
 > * **No medical diagnosis or treatment should be initiated, altered, or stopped based on outputs from this system.**
 > * **Rigorous clinical trial validation and regulatory approval (e.g., FDA, CDSCO, CE-MDR) are strictly required before any medical or diagnostic claims can be made.**
 
+> [!IMPORTANT]
+> ### Phase 9 — Research Study Preparation
+> **Study status:** `APPROVAL_PENDING`
+> **Clinical collection:** `BLOCKED`
+> **Clinical dataset:** `NOT AVAILABLE`
+> **Clinical model training:** `NOT PERFORMED`
+> **Clinical validation:** `NOT PERFORMED`
+>
+> Phase 9 provides study-governance templates and controlled collection safeguards only. It does not authorize human-subject research or claim ethics/IRB/IEC/CDSCO approval.
+
 ---
 
 ## 1. Problem Statement

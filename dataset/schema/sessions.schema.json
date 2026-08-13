@@ -30,6 +30,11 @@
       "enum": ["clinical_room", "field_clinic", "household", "outdoor", "unknown"],
       "description": "Physical setting of the capture session."
     },
+    "capture_environment_metadata": {
+      "type": "object",
+      "description": "Protocol-approved capture context without direct identifiers.",
+      "additionalProperties": true
+    },
     "lighting_condition": {
       "type": "string",
       "enum": ["indoor_ambient", "indoor_led_flash", "outdoor_shade", "direct_sunlight", "controlled_light_box", "unknown"],
@@ -50,6 +55,11 @@
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]{3,64}$",
       "description": "Pseudonymous study-generated device identifier (no IMEI or hardware serial)."
+    },
+    "device_metadata": {
+      "type": "object",
+      "description": "Allow-listed research device and camera configuration; never serial numbers or IMEI.",
+      "additionalProperties": true
     },
     "consent_status": {
       "type": "string",

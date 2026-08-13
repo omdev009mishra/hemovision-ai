@@ -1,6 +1,19 @@
 {
   "dataset_version": "1.0.0",
   "dataset_type": "synthetic",
+  "study_id": "STUDY_ID_REQUIRED",
+  "protocol_version": "PROTOCOL_VERSION_REQUIRED",
+  "consent_version": "CONSENT_VERSION_REQUIRED",
+  "participant_count": 1,
+  "session_count": 1,
+  "image_count": 1,
+  "usable_image_count": 1,
+  "segmentation_success_count": 0,
+  "lab_linked_image_count": 1,
+  "withdrawn_participant_count": 0,
+  "excluded_image_count": 0,
+  "freeze_status": "OPEN",
+  "freeze_timestamp": null,
   "creation_timestamp": "2026-08-13T18:01:53.151574+00:00",
   "random_seed": 42,
   "counts": {
@@ -27,6 +40,7 @@
   },
   "governance": {
     "has_governed_clinical_declaration": false,
-    "clinical_training_allowed": false
+    "clinical_training_allowed": false,
+    "clinical_validation_status": "NOT_PERFORMED"
   }
 }

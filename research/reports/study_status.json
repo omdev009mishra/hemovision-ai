@@ -1,0 +1,16 @@
+{
+  "study_status": "APPROVAL_PENDING",
+  "approval_status": "NOT_APPROVED_FOR_HUMAN_COLLECTION",
+  "participant_count": 0,
+  "session_count": 0,
+  "usable_images": 0,
+  "rejected_images": 0,
+  "segmentation_success_rate": 0.0,
+  "lab_linkage_rate": 0.0,
+  "metadata_completeness": 0.0,
+  "withdrawals": 0,
+  "protocol_deviations": 0,
+  "clinical_collection": "BLOCKED",
+  "clinical_training": "BLOCKED",
+  "clinical_validation": "NOT_PERFORMED"
+}

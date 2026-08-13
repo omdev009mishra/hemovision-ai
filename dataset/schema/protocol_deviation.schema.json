@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hemovision.ai/schemas/protocol_deviation.schema.json",
+  "title": "ProtocolDeviationRecord",
+  "type": "object",
+  "required": [
+    "deviation_id",
+    "participant_id",
+    "session_id",
+    "deviation_type",
+    "description",
+    "timestamp",
+    "operator_id",
+    "resolution",
+    "impact"
+  ],
+  "properties": {
+    "deviation_id": {"type": "string", "pattern": "^HV-DEV-[0-9]{6}$"},
+    "participant_id": {"type": "string", "pattern": "^(HV-P-[A-Z0-9]+|SYNTHETIC-P[A-Z0-9-]+)$"},
+    "session_id": {"type": "string", "pattern": "^HV-SESSION-[0-9]{6}$"},
+    "deviation_type": {
+      "type": "string",
+      "enum": ["wrong_camera", "incorrect_lighting", "missing_eye", "late_laboratory_measurement", "missing_metadata", "consent_issue", "other"]
+    },
+    "description": {"type": "string", "maxLength": 1000},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "operator_id": {"type": "string"},
+    "resolution": {"type": "string", "maxLength": 500},
+    "impact": {"type": "string", "maxLength": 500}
+  },
+  "additionalProperties": false
+}
